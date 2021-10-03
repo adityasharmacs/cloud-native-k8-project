@@ -12,7 +12,7 @@ metadata:
   namespace: default
 type: Opaque
 data:
-  redis_password:  LSBmb29iYXJlZAo= 
+  redis_password:  "" 
 
 ---
 
