@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- toYaml .Values.deployment.label | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- toYaml .Values.deployment.label | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- toYaml .Values.deployment.label | nindent 8 }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 3001
+          livenessProbe:
+            httpGet:
+              {{- toYaml .Values.deployment.livenessProbe | nindent 14 }}
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              {{- toYaml .Values.deployment.readinessProbe | nindent 14 }}
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            {{- toYaml .Values.deployment.envSettings | nindent 12 }}
+          {{- with .Values.persistence.volumeMounts }}
+          volumeMounts:
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
+      volumes:
+      {{- toYaml .Values.persistence.volumes | nindent 6 }}
+      restartPolicy: Always
+      
+      

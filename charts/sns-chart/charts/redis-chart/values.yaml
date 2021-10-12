@@ -1,0 +1,72 @@
+# Default values for redis-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+namespace: sns
+
+appName: redis
+
+image:
+  repository: redis
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "6.0.4-alpine"
+  args:
+    - "/usr/local/etc/redis/redis.conf"
+    - "--appendonly"
+    - "yes"
+
+podAnnotations: {}
+
+podSecurityContext: 
+  fsGroup: 1000
+  runAsUser: 999
+  runAsGroup: 1000
+
+securityContext:
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 999
+  allowPrivilegeEscalation: false
+
+service:
+  type: ClusterIP
+  port: 80
+
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 256Mi
+  requests:
+    cpu: 250m
+    memory: 128Mi
+
+volumeMounts:
+- name: conf
+  mountPath: "/usr/local/etc/redis"
+- name: redis-storage
+  mountPath: "/usr/test-pod"
+        
+volumes:
+- name: conf
+  secret:
+    secretName: redis-conf
+
+volumeClaimTemplates:
+- metadata:
+      name: redis-storage
+  spec:
+    accessModes: [ "ReadWriteOnce" ]
+    storageClassName: "standard"
+    resources:
+      requests:
+        storage: 1Gi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
